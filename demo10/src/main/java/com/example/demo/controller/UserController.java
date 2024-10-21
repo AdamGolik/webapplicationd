@@ -30,11 +30,11 @@ public class UserController {
         if (userRepository.existsByEmail(user.getEmail())) {
             return ResponseEntity.badRequest().body("Email already in use");
         }
-        if (userRepository.existsByUsername(user.getUsername())) {
-            return ResponseEntity.badRequest().body("Username already in use");
-        }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
         printDebug("Creating user", user.getUsername());
+
+        // Szyfrowanie hasła
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         return ResponseEntity.ok(userRepository.save(user));
     }
 
@@ -53,7 +53,10 @@ public class UserController {
                 .map(user -> {
                     user.setUsername(userDetails.getUsername());
                     user.setEmail(userDetails.getEmail());
+
+                    // Szyfrowanie hasła przy aktualizacji
                     user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
+
                     return ResponseEntity.ok(userRepository.save(user));
                 })
                 .orElse(ResponseEntity.notFound().build());
